@@ -1,0 +1,105 @@
+[
+  {
+    "id": "etla",
+    "name": "Tianguis de Etla",
+    "lat": 17.1725,
+    "lng": -96.7833,
+    "day": "Miércoles",
+    "hours": "07:00–14:00",
+    "products": [
+      "Queso",
+      "Verduras",
+      "Flores"
+    ]
+  },
+  {
+    "id": "tlacolula",
+    "name": "Tlacolula",
+    "lat": 16.9508,
+    "lng": -96.4806,
+    "day": "Domingo",
+    "hours": "06:00–16:00",
+    "products": [
+      "Mezcal",
+      "Textiles",
+      "Comida"
+    ]
+  },
+  {
+    "id": "zaachila",
+    "name": "Zaachila",
+    "lat": 16.9253,
+    "lng": -96.7537,
+    "day": "Jueves",
+    "hours": "07:00–15:00",
+    "products": [
+      "Verduras",
+      "Carnes",
+      "Ropa"
+    ]
+  },
+  {
+    "id": "reforma",
+    "name": "Tianguis de Reforma",
+    "lat": 17.0732,
+    "lng": -96.7314,
+    "day": "Sábado",
+    "hours": "08:00–13:30",
+    "products": [
+      "Comida",
+      "Frutas",
+      "Snacks"
+    ]
+  },
+  {
+    "id": "la_noria",
+    "name": "Tianguis de La Noria",
+    "lat": 17.0631,
+    "lng": -96.7234,
+    "day": "Viernes",
+    "hours": "08:00–13:00",
+    "products": [
+      "Plantas",
+      "Artículos para el hogar"
+    ]
+  },
+  {
+    "id": "sanchez_pasques",
+    "name": "Tianguis de Sánchez Pascuas",
+    "lat": 17.063,
+    "lng": -96.7284,
+    "day": "Viernes",
+    "hours": "07:30–13:30",
+    "products": [
+      "Orgánicos",
+      "Pan",
+      "Queso"
+    ]
+  },
+  {
+    "id": "xoxocotlan",
+    "name": "Xoxocotlán",
+    "lat": 17.019,
+    "lng": -96.7433,
+    "day": "Lunes",
+    "hours": "07:00–14:00",
+    "products": [
+      "Comida",
+      "Artesanías",
+      "Verduras"
+    ]
+  },
+  {
+    "id": "ivcentro",
+    "name": "Tianguis del IV Centenario",
+    "lat": 17.0649,
+    "lng": -96.7232,
+    "day": "Martes",
+    "hours": "07:00–14:00",
+    "products": [
+      "Comida",
+      "Ropa",
+      "Frutas"
+    ]
+  }
+]

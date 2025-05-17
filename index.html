@@ -1,45 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tianguis Cerca de Mí</title>
   <style>
     body { font-family: sans-serif; margin: 0; padding: 0; }
     #map { height: 50vh; width: 100%; }
+    #controls { padding: 1em; background: #f5f5f5; }
     #list { padding: 1em; }
     .tianguis { margin-bottom: 1em; padding: 1em; border: 1px solid #ccc; border-radius: 5px; }
     .highlight { background-color: #eef; }
   </style>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDndz38d9S7_VStKc_ZZvj1LcL8NEdM1j8"></script>
 </head>
 <body>
   <h2 style="text-align:center">🧺 Tianguis Cerca de Mí</h2>
+  <div id="controls">
+    <label for="daySelect">📆 Elige un día: </label>
+    <select id="daySelect">
+      <option value="">Hoy</option>
+      <option value="Lunes">Lunes</option>
+      <option value="Martes">Martes</option>
+      <option value="Miércoles">Miércoles</option>
+      <option value="Jueves">Jueves</option>
+      <option value="Viernes">Viernes</option>
+      <option value="Sábado">Sábado</option>
+      <option value="Domingo">Domingo</option>
+    </select>
+  </div>
   <div id="map"></div>
   <div id="list"></div>
 
   <script>
-    const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-    const tianguisData = [
-      {
-        id: "etla",
-        name: "Tianguis de Etla",
-        lat: 17.1725,
-        lng: -96.7833,
-        day: "Wednesday",
-        hours: "07:00–14:00",
-        products: ["Queso", "Verduras", "Flores"]
-      },
-      {
-        id: "tlacolula",
-        name: "Tlacolula",
-        lat: 16.9508,
-        lng: -96.4806,
-        day: "Sunday",
-        hours: "06:00–16:00",
-        products: ["Mezcal", "Textiles", "Comida"]
-      }
-    ];
+    let map;
+    let markers = [];
+    let userLat = null, userLng = null;
+    let tianguisData = [];
+
+    const daySelect = document.getElementById("daySelect");
+    const listDiv = document.getElementById("list");
+
+    const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+    const today = dias[new Date().getDay()];
 
     function haversineDistance(lat1, lon1, lat2, lon2) {
       const R = 6371;
@@ -53,20 +55,49 @@
       return R * c;
     }
 
-    function init() {
-      if (!window.google || !window.google.maps) {
-        alert("Google Maps API no cargado correctamente.");
-        return;
-      }
+    function clearMarkers() {
+      markers.forEach(m => m.setMap(null));
+      markers = [];
+    }
 
+    function renderTianguis(data, selectedDay) {
+      clearMarkers();
+      listDiv.innerHTML = '';
+
+      const filtered = data.filter(t => selectedDay === "" ? t.day === today : t.day === selectedDay);
+      const sorted = filtered.map(t => {
+        const dist = haversineDistance(userLat, userLng, t.lat, t.lng);
+        return { ...t, distance: dist };
+      }).sort((a, b) => a.distance - b.distance);
+
+      sorted.forEach(t => {
+        const marker = new google.maps.Marker({
+          position: { lat: t.lat, lng: t.lng },
+          map,
+          title: t.name,
+          icon: t.day === today ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' : null
+        });
+        markers.push(marker);
+
+        const div = document.createElement('div');
+        div.className = 'tianguis' + (t.day === today ? ' highlight' : '');
+        div.innerHTML = `<strong>${t.name}</strong><br>
+                         📍 ${t.distance.toFixed(1)} km<br>
+                         🗓️ ${t.day} – ${t.hours}<br>
+                         🧺 ${t.products.join(", ")}`;
+        listDiv.appendChild(div);
+      });
+    }
+
+    function initMap() {
       navigator.geolocation.getCurrentPosition(
         pos => {
-          const userLat = pos.coords.latitude;
-          const userLng = pos.coords.longitude;
+          userLat = pos.coords.latitude;
+          userLng = pos.coords.longitude;
 
-          const map = new google.maps.Map(document.getElementById('map'), {
+          map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: userLat, lng: userLng },
-            zoom: 10
+            zoom: 11
           });
 
           new google.maps.Marker({
@@ -76,35 +107,28 @@
             icon: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
           });
 
-          const listDiv = document.getElementById("list");
-
-          const tianguisWithDistance = tianguisData.map(t => {
-            const dist = haversineDistance(userLat, userLng, t.lat, t.lng);
-            return { ...t, distance: dist };
-          }).sort((a, b) => a.distance - b.distance);
-
-          tianguisWithDistance.forEach(t => {
-            new google.maps.Marker({
-              position: { lat: t.lat, lng: t.lng },
-              map,
-              title: t.name,
-              icon: t.day === today ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' : null
+          fetch("tianguis.json")
+            .then(res => res.json())
+            .then(data => {
+              tianguisData = data;
+              renderTianguis(tianguisData, "");
+              daySelect.value = "";
             });
 
-            const div = document.createElement('div');
-            div.className = 'tianguis' + (t.day === today ? ' highlight' : '');
-            div.innerHTML = `<strong>${t.name}</strong><br>
-                             📍 ${t.distance.toFixed(1)} km<br>
-                             🗓️ ${t.day} – ${t.hours}<br>
-                             🧺 ${t.products.join(", ")}`;
-            listDiv.appendChild(div);
+          daySelect.addEventListener("change", () => {
+            renderTianguis(tianguisData, daySelect.value);
           });
         },
-        err => alert("No pudimos obtener tu ubicación")
+        err => {
+          alert("No pudimos obtener tu ubicación. Activa permisos de localización.");
+          console.error(err);
+        }
       );
     }
+  </script>
 
-    window.onload = init;
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDndz38d9S7_VStKc_ZZvj1LcL8NEdM1j8&callback=initMap">
   </script>
 </body>
 </html>
